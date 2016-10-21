@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if [ $TTY == 0 ]; then
+    printf 'Running heppc19 setups\n'
+fi
+
+
+alias e='/usr/bin/emacs-23.1-nox -nw'
+source $HOME/root2/root/bin/thisroot.sh
+

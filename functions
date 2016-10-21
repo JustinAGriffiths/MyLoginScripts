@@ -1,0 +1,287 @@
+#!/bin/bash
+
+# open(){
+#     gnome-open $1 2> /dev/null
+
+# }
+
+notes(){ 
+    if [ -f ~/.notes ]; then 
+	printf '\033[0;31m'
+	cat ~/.notes 
+	printf '\033[0m'
+    fi
+}
+
+read_notes(){
+    emacs -nw ~/.notes
+}
+
+open-png(){
+    dir=some_dummy_dir
+    if [ -d $dir ];then rm -rf $dir; fi
+    mkdir -p $dir
+    cp $@ $dir
+    /usr/bin/eog $dir/*.png
+}
+
+cp_xrootdfs() {
+    destination=${@:${#@}}
+    #echo $destination 
+    if [ ! -d $destination ]; then
+	echo "Destination dir does not exist"
+	ssh gw01 "mkdir -p "$destination
+	#return
+    fi
+    test_cond=`echo $destination | grep -o '^/xrootdfs/'`
+    if [ "$test_cond" == "" ]; then	
+	echo "Destination not in xrootdfs, use cp"
+	return
+    fi
+
+    destination2=`echo $destination | sed 's,/xrootdfs/atlas/local/'$USER',,g'`
+    
+    for arg in $@ ; do
+	if [ "$arg" == "$destination" ]; then continue ; fi
+	echo "xrdcp " $arg $destination
+	if [ -d $arg ]; then
+	    new_dir=`echo $arg | sed 's,/$,,g'`
+	    new_dir=`echo $new_dir | sed 's,.*/,,g'`
+	    if [ ! -d $destination/$new_dir ]; then
+		ssh gw01 "mkdir "$destination/$new_dir
+	    fi
+	    xrdcp --force -r $arg root://storage-1-8.local//atlas/local/$USER/$destination2/$new_dir
+	else
+	    xrdcp $arg root://storage-1-8.local//atlas/local/$USER/$destination2/
+	fi	
+    done
+}
+
+compute(){
+    ssh -Y -t hepgw.uta.edu "ssh -t -Y $UTA 'ssh -Y compute-1-22'"
+}
+
+monitor_mem_top(){
+
+    if [[ ! $1 ]]; then
+	echo "monitor_mem_top process [mem_limit]"
+	echo "monitor process, kill if mem_limit provided and exceeded"
+	return
+    fi
+
+    process=$1
+    mem_limit=200
+    if [[ $2 ]]; then mem_limit=$2 ; fi
+    while [ true ]; do
+	flag=`top -bn1 | grep $process | awk '{sum+=$10} END {if(sum>'$mem_limit') print "mem_exceeded"}'`
+	mem_usage=`top -bn1 | grep $process | awk '{sum+=$10} END {print sum}'`
+	echo $flag $mem_limit $mem_usage
+	if [ "$flag" != "" ]; then
+	    echo "killall "$process
+	    killall $process
+	fi
+	sleep 2
+    done
+
+}
+
+
+heppc19_get(){
+    file_name=$1
+    n_dirs=`echo $file_name | grep -c '/'`
+    while [ $n_dirs -gt 0 ] ; do
+        file_name=`echo $file_name | sed 's,.*/,,g'`
+        n_dirs=`echo $file_name | grep -c '/'`
+    done
+    echo $file_name
+    dir=`echo $1 | sed 's,'$file_name',,g'`
+    target="./"
+    if [[ $2 ]] ; then target=$2; fi
+    ssh hepgw.uta.edu "rm -rf transfers/'$dir'; mkdir -p transfers/'$dir'; scp -i .ssh/id_rsa_hepgw -r heppc19:'$1' transfers/'$dir'"
+    scp -r hepgw.uta.edu:~/transfers/$dir/$file_name $target
+}
+
+
+# uta_get(){
+#     file_name=$1
+#     n_dirs=`echo $file_name | grep -c '/'`
+#     while [ $n_dirs -gt 0 ] ; do
+#         file_name=`echo $file_name | sed 's,.*/,,g'`
+#         n_dirs=`echo $file_name | grep -c '/'`
+#     done
+#     echo $file_name
+#     dir=`echo $1 | sed 's,'$file_name',,g'`
+#     target="./"
+#     if [[ $2 ]] ; then target=$2; fi
+#     #ssh hepgw.uta.edu "echo 'hepgw1'; rm -rf transfers/'$dir'; echo 'hepgw2'; mkdir -p transfers/'$dir'; echo 'hepgw3'; scp -i .ssh/id_rsa_hepgw -r master.tier3-atlas.uta.edu:'$1' transfers/'$dir'"
+#     ssh hepgw.uta.edu "rm -rf transfers/'$dir'; mkdir -p transfers/'$dir'; scp -r master.tier3-atlas.uta.edu:'$1' transfers/'$dir'"
+#     scp -r hepgw.uta.edu:~/transfers/$dir/$file_name $target
+# }
+
+get_from(){
+    HOST1=$2
+    HOST2=$3
+    if [[ $5 ]]; then 
+	HOST1_rsa="-i "$5;
+    fi
+    if [[ $6 ]]; then
+	HOST2_rsa="-i "$6;
+    fi
+    file_name=$1
+    n_dirs=`echo $file_name | grep -c '/'`
+    while [ $n_dirs -gt 0 ] ; do
+        file_name=`echo $file_name | sed 's,.*/,,g'`
+        n_dirs=`echo $file_name | grep -c '/'`
+    done
+    echo $file_name 
+    dir=`echo $1 | sed 's,'$file_name',,g'`
+    target="./"
+    if [[ $4 ]] ; then target=$4; fi
+    ssh $HOST1 "rm -rf transfers/'$dir'; mkdir -p transfers/'$dir'; scp $HOST1_rsa -r $HOST2:'$1' transfers/'$dir'"
+    scp -r $HOST1:~/transfers/$dir/$file_name $target
+}
+
+supercomputer_get(){
+    get_from $1 orodruin.uta.edu $SUPERCOMPUTER "./" ".ssh/id_rsa_ditto"
+}
+
+uta_get(){
+    get_from $1 hepgw.uta.edu $UTA $2
+}
+
+atlas_get(){
+    file_name=$1
+    n_dirs=`echo $file_name | grep -c '/'`
+    while [ $n_dirs -gt 0 ] ; do
+        file_name=`echo $file_name | sed 's,.*/,,g'`
+        n_dirs=`echo $file_name | grep -c '/'`
+    done
+    echo $file_name
+    dir=`echo $1 | sed 's,'$file_name',,g'`
+    target="./"
+    if [[ $2 ]] ; then target=$2; fi
+#    ssh hepgw.uta.edu "echo 'hepgw1'; rm -rf transfers/'$dir'; echo 'hepgw2'; mkdir -p transfers/'$dir'; echo 'hepgw3'; scp -i .ssh/id_rsa_hepgw -r master.tier3-atlas.uta.edu:'$1' transfers/'$dir'"
+    #the scp tier3 to hepgw brings up x-window for password
+    ssh hepgw.uta.edu " rm -rf transfers/'$dir'; mkdir -p transfers/'$dir'; scp -r -i .ssh/id_rsa_hepgw atlas007.uta.edu:'$1' transfers/'$dir'"
+    scp -r hepgw.uta.edu:~/transfers/$dir/$file_name $target
+}
+
+
+uta_put(){
+    file_name=$1
+    n_dirs=`echo $file_name | grep -c '/'`
+    while [ $n_dirs -gt 0 ] ; do
+        file_name=`echo $file_name | sed 's,.*/,,g'`
+        n_dirs=`echo $file_name | grep -c '/'`
+    done
+    echo $file_name
+    target="~/"
+    if [[ $2 ]] ; then target=$2; fi
+    scp -r $1 hepgw.uta.edu:~/transfers/
+    ssh hepgw.uta.edu "scp -i .ssh/id_rsa_hepgw -r transfers/'$file_name' master.tier3-atlas.uta.edu:'$target'"
+}
+
+uw_get() {
+    target='.'
+    file_name=$1
+    n_dirs=`echo $file_name | grep -c '/'`
+    while [ $n_dirs -gt 0 ] ; do
+	file_name=`echo $file_name | sed 's,.*/,,g'`
+	n_dirs=`echo $file_name | grep -c '/'`
+    done
+    echo $file_name
+    
+    if [[ $2 ]] ; then target=$2; fi
+    if [[ $3 ]] ; then
+#	ssh lxplus$3.cern.ch "scp -r uwws3:'$1' /tmp/griffith/$file_name"
+	ssh lxplus$3.cern.ch "scp -r 128.141.95.125:'$1' /tmp/griffith/$file_name"
+	scp -r lxplus$3.cern.ch:/tmp/griffith/$file_name $target
+    else
+#	ssh lxplus.cern.ch "scp -r uwws3:'$1' transfers/$file_name"
+	ssh lxplus.cern.ch "scp -r 128.141.95.125:'$1' transfers/$file_name"
+	scp -r lxplus.cern.ch:~/transfers/$file_name $target
+    fi   
+}
+
+make_root() {
+    cflags=`root-config --cflags`
+    libs=`root-config --libs`
+    name=`echo $1 | sed 's,\..*,,g'`
+    if [[ $2 ]] ; then name=$2; fi
+    g++ -g -Wall -fPIC -pthread -m64 $cflags $libs -o $name $1
+    #g++ -g -Wall -fPIC -pthread -m64 $cflags -I/$HOME/my_code/include $libs -L$HOME/my_code/lib -lmyAnalysis -lRooFit -lRooStats -lHistFactory -o $name $1
+}
+
+make_root_clean() {
+    cflags=`root-config --cflags`
+    libs=`root-config --libs`
+    name=`echo $1 | sed 's,\..*,,g'`
+    if [[ $2 ]] ; then name=$2; fi
+    #g++ -g -Wall -fPIC -pthread -m64 $cflags $libs -o $name $1
+    g++ -g -Wall -fPIC -pthread -m64 $cflags $libs -o $name $1
+}
+
+make_stat_root() {
+    cflags=`root-config --cflags`
+    libs=`root-config --libs`
+    name=`echo $1 | sed 's,\..*,,g'`
+    if [[ $2 ]] ; then name=$2; fi
+    g++ -g -Wall -fPIC -pthread -m64 $cflags $libs -lRooStats -lRooFit -lRooFitCore -o $name $1
+}
+
+
+
+make_shared_root() {
+    cflags=`root-config --cflags`
+    libs=`root-config --libs`
+    name=`echo $1 | sed 's,\..*,,g' | sed 's,.*,lib&.so,g'`
+    if [[ $2 ]] ; then name=$2; fi
+    g++ -O -Wall -fPIC -pthread -m64 $cflags $libs --shared -o $name $1
+}
+
+make_pdf(){
+   name=`echo $1 | sed 's,\..*,,g'`
+   if [[ $2 ]] ; then name=$2; fi
+   latex $name.tex &&
+   dvipdf $name.dvi   
+}
+
+
+xx() {
+    ssh lxplus$1.cern.ch -Y
+}
+
+compile() {
+    if [[ $1 ]] ; then
+
+	ssh -t lxplus.cern.ch "ssh uwws3 'cd dissertation; make' " && ssh lxplus.cern.ch "scp uwws3:~/dissertation/uwthesis.pdf ." && scp lxplus.cern.ch:uwthesis.pdf . && acroread uwthesis.pdf
+    else
+	ssh uwws3 "cd dissertation; make " && scp uwws3:~/dissertation/uwthesis.pdf . && acroread uwthesis.pdf
+    fi
+}
+
+print54(){
+    mkdir tmp_print;
+    for var in "$@"; do
+	cp $var tmp_print
+    done
+    scp -r tmp_print uwws3:/tmp/griffith
+    ssh uwws3 "cd /tmp/griffith/tmp_print; ls -d *; print54 *; cd ../; rm -rf tmp_print"
+
+    rm -rf tmp_print;
+}
+
+winname() {
+    printf "\e]2;$1\a"
+}
+
+tabname() {
+  printf "\e]1;$1\a"
+}
+
+share_rsa(){
+    ssh $1 "mkdir -p .ssh;"
+    scp $HOME/.ssh/id_rsa.pub $1:.ssh/id_rsa_visitor.pub
+    ssh $1 "cd .ssh; cat id_rsa_visitor.pub >> authorized_keys"
+}
+

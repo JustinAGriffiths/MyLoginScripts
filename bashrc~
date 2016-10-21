@@ -1,0 +1,124 @@
+#!bin/bash
+#echo "Welcome to My Terminal :)"
+
+buffer=`tty`
+export TTY=$?
+
+export SHORT_HOSTNAME=`echo $HOSTNAME | grep -io '^[a-zA-Z0-9_]*'`
+if [ "$SHORT_HOSTNAME" == "master" ]; then
+    export SHORT_HOSTNAME='tier3-uta'
+fi
+
+which sw_vers &> /dev/null
+#if [ $? == 0 -a $TTY != 0 ]; then
+if [ $? == 0 ]; then
+    export SHORT_HOSTNAME='Mac'
+fi
+
+# winname_timer(){
+#     export GLOB_WINNAME_COUNTER=3600
+#     #let GLOB_WINNAME_COUNTER=3600
+#     while [ true ]; do
+# 	winname `echo $SHORT_HOSTNAME"_:_"$GLOB_WINNAME_COUNTER`
+# 	sleep 1
+# 	let GLOB_WINNAME_COUNTER=$GLOB_WINNAME_COUNTER-1
+#     done
+# }
+
+export VALGRIND_LIB="$HOME/bin/lib/valgrind"
+export MANPATH=$MANPATH:/usr/local/share/man
+#export PROMPT_COMMAND='string=`~/bin/string $COLUMNS $PWD` ; winname `date | cut -f 4 -d " " | sed 's,^,'$SHORT_HOSTNAME"_"',g'` '
+#export PROMPT_COMMAND='string=`~/bin/string $COLUMNS $PWD` ;  let GLOB_WINNAME_COUNTER=3600'
+#export PROMPT_COMMAND='_time_=`date | cut -f4 -d " "`; string=`~/bin/string $COLUMNS $PWD $_time_`'
+export PROMPT_COMMAND='_time_=`date | sed "s,.*\([0-9][0-9]:[0-9][0-9]:[0-9][0-9]\).*,\1,g"`; string=`~/bin/string $COLUMNS $PWD $_time_`'
+#export PROMPT_COMMAND='string=`~/bin/string $COLUMNS $PWD`'
+PS1='\[\033[0;35m\]$string\n\[\033[1;36m\]\u@\h: $ \[\033[0m\]'
+export HISTCONTROL="ignoredups"
+
+
+export LD_LIBRARY_PATH=$HOME/my_code/lib:$LD_LIBRARY_PATH
+export SVNGROUPS='svn+ssh://svn.cern.ch/reps/atlasgrps/'
+export SVNPHYS='svn+ssh://svn.cern.ch/reps/atlasphys/'
+export SVNPERF='svn+ssh://svn.cern.ch/reps/atlasperf/'
+export SVNINST='svn+ssh://svn.cern.ch/reps/atlasinst/'
+export SVNOFF='svn+ssh://svn.cern.ch/reps/atlasoff/'
+export SVNUSR='svn+ssh://svn.cern.ch/reps/atlasusr/'
+
+export UTA='master.tier3-atlas.uta.edu'
+
+alias uta='ssh -t -Y hepgw.uta.edu "ssh -Y -i .ssh/id_rsa_hepgw master.tier3-atlas.uta.edu"'
+alias uta_xrd='ssh -t -Y hepgw.uta.edu "ssh -Y -i .ssh/id_rsa_hepgw gw01.tier3-atlas.uta.edu"'
+export SUPERCOMPUTER='192.168.1.5'
+alias supercomputer='ssh -Y -t orodruin.uta.edu "ssh -i .ssh/id_rsa_ditto -Y $SUPERCOMPUTER"'
+
+export SVNCFG='https://cfb-rankings.svn.sourceforge.net/svnroot/cfb-rankings/'
+export SVNLSR='https://cfb-rankings.svn.sourceforge.net/svnroot/lsroot'
+
+alias open='gnome-open'
+alias which='alias | /usr/bin/which --tty-only --read-alias --show-dot --show-tilde'
+alias sforge='svn --username jgriffi6'
+# alias ssh='ssh -Y -i $HOME/.ssh/id_rsa_$SHORT_HOSTNAME'
+# alias scp='scp -i $HOME/.ssh/id_rsa_$SHORT_HOSTNAME'
+alias ssh='ssh -Y -i $HOME/.ssh/id_rsa '
+alias scp='scp -i $HOME/.ssh/id_rsa_$SHORT_HOSTNAME -i $HOME/.ssh/id_rsa_$SHORT_HOSTNAME'
+alias ls='ls --color=tty -B'
+alias root='root -l'
+alias cls='clear'
+alias grep='grep --color=auto'
+alias e='emacs -nw'
+alias emacs='emacs -nw'
+alias cern='ssh -Y lxplus.cern.ch'
+alias cern6='ssh -Y lxplus6.cern.ch'
+alias cern5='ssh -Y lxplus5.cern.ch'
+alias uw3='ssh -t -Y lxplus.cern.ch "ssh -Y uwws3"'
+alias cursor='tput cnorm'
+
+alias voms='voms-proxy-init -voms atlas'
+
+alias lsRoot='$HOME/bin/source/lsroot/bin/lsRoot'
+export PATH=$PATH:~/bin
+export PATH=$PATH:~/bin/source/lsroot/bin
+export MANPATH=$MANPATH:~/bin/source/lsRoot/man/
+
+alias hulu='sudo ssh -D 22 jgriffi6@dante.u.washington.edu'
+source $HOME/.bash_functions
+
+if [ $TTY == 0 ]; then
+    if [ -f $HOME/site_specific_setup_scripts/$HOSTNAME.sh ]; then 
+	source $HOME/site_specific_setup_scripts/$HOSTNAME.sh
+    elif [ "`echo $HOSTNAME | grep -io 'lxplus'`" == "lxplus" ]; then
+	source $HOME/site_specific_setup_scripts/lxplus.cern.ch.sh
+    elif [ -f $HOME/site_specific_setup_scripts/$SHORT_HOSTNAME.sh ]; then
+	source $HOME/site_specific_setup_scripts/$SHORT_HOSTNAME.sh
+    fi
+fi
+
+
+# if [ "`echo $SHORT_HOSTNAME`" == "Mac" ]; then
+#     #Mac only commands
+#     printf ''
+# else
+#     #linux only commands
+#     setxkbmap -option ctrl:nocaps
+# fi
+
+
+if [ $TTY == 0 ]; then
+    source $HOME/.bash_functions
+fi
+
+if [ $TTY == 0 ]; then
+    winname $SHORT_HOSTNAME
+    tabname $SHORT_HOSTNAME
+    #winname_timer &
+    if [ "$SHORT_HOSTNAME" != "Mac" ]; then
+	export `dircolors | head -n 1 | sed 's,;$,,g' | sed "s,',,g"`
+    fi
+    
+    printf 'Welcome to my Terminal!\n'
+    printf 'Running on Host: '$HOSTNAME'\n'
+    notes 
+fi
+
+
+cd $HOME

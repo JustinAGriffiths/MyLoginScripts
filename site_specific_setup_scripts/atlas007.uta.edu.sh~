@@ -1,0 +1,15 @@
+#!/bin/bash
+
+if [ $TTY == 0 ]; then
+    printf 'Running atlas007 setups\n'
+fi
+
+alias string='string_atlas007'
+export PROMPT_COMMAND='string=`string $COLUMNS $PWD`'
+PS1='\[\033[0;35m\]$string\n\[\033[1;36m\]\u@\h: $ \[\033[0m\]'
+
+
+source /usr/local/root/5.22/bin/thisroot.sh
+alias e='/usr/bin/emacs -nw'
+alias lsRoot='$HOME/bin/source/lsroot/bin/_lsRoot_atlas007'
+
