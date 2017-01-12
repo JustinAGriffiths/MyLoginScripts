@@ -32,6 +32,7 @@ alias emacs='emacs -nw'
 alias e='emacs -nw'
 alias cursor='tput cnorm'
 export PATH=$PATH:~/bin
+PYTHONSTARTUP=$HOME/MyLoginScripts/python_startup.py
 
 #cern/atlas stuff
 export SVNGROUPS='svn+ssh://svn.cern.ch/reps/atlasgrps/'
