@@ -69,7 +69,8 @@ if [ $TTY == 0 ]; then
 	source $HOME/site_specific_setup_scripts/lxplus.cern.ch.sh
     elif [ -f $HOME/site_specific_setup_scripts/$SHORT_HOSTNAME.sh ]; then
 	source $HOME/site_specific_setup_scripts/$SHORT_HOSTNAME.sh
-    fi
+    fi    
+    source $HOME/.helper_scripts/git_helpers.sh
 fi
 
 

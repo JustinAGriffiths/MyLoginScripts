@@ -23,6 +23,10 @@ verify .bash_functions
 if [[ -d $HOME/site_specific_setup_scripts && -L $HOME/site_specific_setup_scripts ]]; then
     rm $HOME/site_specific_setup_scripts
 fi
+
+if [[ -d $HOME/helper_scripts && -L $HOME/helper_scripts ]]; then
+    rm $HOME/helper_scripts
+fi
     
     
 
@@ -30,6 +34,7 @@ ln -s $SCRIPT_DIR'bashrc' $HOME/.bashrc
 ln -s $SCRIPT_DIR'bash_logout' $HOME/.bash_logout
 ln -s $SCRIPT_DIR'functions' $HOME/.bash_functions
 ln -s $SCRIPT_DIR'site_specific_setup_scripts' $HOME/site_specific_setup_scripts
+ln -s $SCRIPT_DIR'helper_scripts' $HOME/.helper_scripts
 
 
 
