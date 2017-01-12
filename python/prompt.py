@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python
 import os
 
 rows,columns=os.popen('stty size', 'r').read().split()
