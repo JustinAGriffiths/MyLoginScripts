@@ -4,8 +4,13 @@ if [ $TTY == 0 ]; then
     printf 'Running lxplus setups\n'
 fi
 
+alias setup_r21='source $HOME/public/setup_r21.sh'
 
-PS1='\[\033[0;35m\]$string\n\[\033[0;33m\]\u@\h: $ \[\033[0m\]'
+
+PS1='\[\033[0;35m\]$prompt_string\n\[\033[0;33m\]\u@\h: $ \[\033[0m\]'
+
+export RUCIO_ACCOUNT=griffith
+export ROOTCORE_NCPUS=4
 
 # export LD_LIBRARY_PATH=/afs/cern.ch/sw/lcg/external/Python/2.7.2/x86_64-slc5-gcc43-opt/lib:$LD_LIBRARY_PATH
 # export PATH=/afs/cern.ch/sw/lcg/external/Python/2.6.2/x86_64-slc5-gcc43-opt/bin/:$PATH
@@ -37,10 +42,17 @@ setupROOT(){
 # export PATH=/afs/cern.ch/sw/lcg/external/Python/2.7.3/x86_64-slc6-gcc46-opt/bin:$PATH
 # export LD_LIBRARY_PATH=/afs/cern.ch/sw/lcg/external/Python/2.7.3/x86_64-slc6-gcc46-opt/lib:$LD_LIBRARY_PATH
 
-source /cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase/x86_64/Gcc/gcc481_x86_64_slc6/setup.sh
-export LD_LIBRARY_PATH=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase/x86_64/python/2.7.4-x86_64-slc6-gcc48/sw/lcg/external/Python/2.7.4/x86_64-slc6-gcc48-opt/lib:$LD_LIBRARY_PATH
-export PATH=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase/x86_64/python/2.7.4-x86_64-slc6-gcc48/sw/lcg/external/Python/2.7.4/x86_64-slc6-gcc48-opt/bin:$PATH
-source /cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase/x86_64/root/5.34.18-x86_64-slc6-gcc4.8/bin/thisroot.sh
+export ATLAS_LOCAL_ROOT_BASE=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase/
+ls $ATLAS_LOCAL_ROOT_BASE &> /dev/null
+let cvmfs_code=$?
+
+# if [ $cvmfs_code == 0 ]; then
+
+    # source /cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase/x86_64/Gcc/gcc481_x86_64_slc6/setup.sh
+    # export LD_LIBRARY_PATH=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase/x86_64/python/2.7.4-x86_64-slc6-gcc48/sw/lcg/external/Python/2.7.4/x86_64-slc6-gcc48-opt/lib:$LD_LIBRARY_PATH
+    # export PATH=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase/x86_64/python/2.7.4-x86_64-slc6-gcc48/sw/lcg/external/Python/2.7.4/x86_64-slc6-gcc48-opt/bin:$PATH
+    # source /cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase/x86_64/root/5.34.18-x86_64-slc6-gcc4.8/bin/thisroot.sh
+# fi
 
 fjet_make_root() {
     cflags=`root-config --cflags`
@@ -57,7 +69,11 @@ fjet_make_root() {
 
 setup_lsRoot(){
     root_sys=`echo $ROOTSYS | sed 's,/root$,,g'`
-    root_sys=`echo $root_sys | sed 's,.*/,,g'`
+    if [ "`echo $ROOTSYS | grep ROOT`" == "" ]; then
+	root_sys=`echo $root_sys | sed 's,.*/,,g'`
+    else
+	root_sys=`echo $root_sys | sed "s,.*/ROOT,,g" | sed "s,/,-,g"`
+    fi
     if [ -f $HOME/bin/source/lsroot/bin_root_ver/lsRoot_$root_sys ]; then
 	echo "Changing alias to: " lsRoot_$root_sys
     else
@@ -84,7 +100,7 @@ setup_mycode(){
 	cd $HOME/my_code
 	FILE=Makefile
 	root_ver=`echo $ROOTSYS | grep 'root/6'`
-	if [ "$root_ver"=="root/6" ]; then
+	if [ "$root_ver" == "root/6" ]; then
 	    FILE=Makefile.r6
 	fi
 	make clean; 
@@ -100,5 +116,5 @@ setup_mycode(){
 
 if [ $TTY == 0 -a $cvmfs_code == 0 ]; then
     setup_lsRoot
-    setup_mycode
+    #setup_mycode
 fi
