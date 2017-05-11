@@ -307,14 +307,6 @@ share_rsa(){
     ssh $1 "cd .ssh; cat id_rsa_visitor.pub >> authorized_keys"
 }
 
-vbox_mount(){
-    grep -qs '/mnt/sharedFolder' /proc/mounts
-    if [ $? -ne 0 ];then
-	sudo mount -t vboxsf sharedFolder -o uid=$USER,gid=$(id -g) /mnt/sharedFolder
-	#ln -s /mnt/sharedFolder $HOME/workarea
-    fi
-}
-
 setup_anaconda(){
     PATH=$HOME/anaconda3/bin/:$PATH
 }

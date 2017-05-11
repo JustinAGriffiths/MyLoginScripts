@@ -81,8 +81,6 @@ if [ $TTY == 0 ]; then
     source $HOME/.bash_functions
 fi
 
-vbox_mount
-
 if [ $TTY == 0 ]; then
     winname $SHORT_HOSTNAME
     tabname $SHORT_HOSTNAME
