@@ -149,6 +149,28 @@ uta_get(){
     get_from $1 hepgw.uta.edu $UTA $2
 }
 
+put_to(){
+    HOST1=$3
+    HOST2=$4
+    uname=griffith
+    if [[ $5 ]]; then uname=$5; fi
+    file_name=$1
+    n_dirs=`echo $file_name | grep -c '/'`
+    while [ $n_dirs -gt 0 ] ; do
+        file_name=`echo $file_name | sed 's,.*/,,g'`
+        n_dirs=`echo $file_name | grep -c '/'`
+    done
+    echo $file_name
+    target="~/"
+    if [[ $2 ]] ; then target=$2; fi
+    scp -r $1 $uname@$HOST1:~/transfers/
+    ssh $uname@$HOST1  "scp -i .ssh/id_rsa.pub-r transfers/'$file_name' citprod\\\\sg0228178@$HOST2:'$target'"
+}
+
+aws_put(){
+    put_to $1 $2 10.6.33.87 cit-p-tnmlas006 citprod\\sg0228178
+}
+
 atlas_get(){
     file_name=$1
     n_dirs=`echo $file_name | grep -c '/'`
@@ -285,3 +307,120 @@ share_rsa(){
     ssh $1 "cd .ssh; cat id_rsa_visitor.pub >> authorized_keys"
 }
 
+vbox_mount(){
+    grep -qs '/mnt/sharedFolder' /proc/mounts
+    if [ $? -ne 0 ];then
+	sudo mount -t vboxsf sharedFolder -o uid=$USER,gid=$(id -g) /mnt/sharedFolder
+	#ln -s /mnt/sharedFolder $HOME/workarea
+    fi
+}
+
+setup_anaconda(){
+    PATH=$HOME/anaconda3/bin/:$PATH
+}
+
+virtual_generic(){
+    if [[ ! $1 ]]; then
+	echo "provide name: "
+	return
+    fi
+    source /usr/share/virtualenvwrapper/virtualenvwrapper.sh
+
+
+    # pip bash completion start
+    _pip_completion()
+    {
+	COMPREPLY=( $( COMP_WORDS="${COMP_WORDS[*]}" \
+				 COMP_CWORD=$COMP_CWORD \
+				 PIP_AUTO_COMPLETE=1 $1 ) )
+    }
+    complete -o default -F _pip_completion pip
+    # pip bash completion end
+
+    export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3
+    source $HOME/.local/bin/virtualenvwrapper.sh
+    export WORKON_HOME=/home/griffith/.virtualenvs
+    export PIP_VIRTUALENV_BASE=$HOME/.virtualenvs
+    export PIP_VIRTUALENV_BASE=$HOME/.virtualenvs
+
+    workon $1
+}
+
+virtual_py35(){
+    virtual_generic ".virtual_py35"
+}
+
+virtual_py27(){
+    virtual_generic .virtual_py27
+}
+
+png_open(){
+    pool=/tmp/$USER/pool/
+    rm -rf $pool
+    mkdir -p $pool
+    cp $@ $pool
+    open $pool/*
+}
+
+my_password(){
+    mkdir -p /tmp/$USER
+    cp $HOME/.proxy.gpg /tmp/$USER/
+    gpg /tmp/$USER/.proxy.gpg
+    cat /tmp/$USER/.proxy
+    rm /tmp/$USER/.proxy*    
+}
+
+set_proxy(){
+    passwd=`my_password`
+    export all_proxy=https://sg0228178:$passwd@www-ad-proxy.sabre.com:80
+    export http_proxy=http://sg0228178:$passwd@www-ad-proxy.sabre.com:80
+    export HTTP_PROXY=http://sg0228178:$passwd@www-ad-proxy.sabre.com:80        
+    export https_proxy=https://sg0228178:$passwd@www-ad-proxy.sabre.com:80
+    export HTTPS_PROXY=https://sg0228178:$passwd@www-ad-proxy.sabre.com:80        
+    unset passwd
+    command=`which $1`
+    options=`echo $@ | sed 's,^'$1',,g'`
+    # echo $command
+    # echo $options
+    $command $options
+    unset all_proxy
+    unset http_proxy
+    unset HTTP_PROXY
+    unset HTTPS_PROXY
+    unset https_proxy
+}
+
+# test(){
+#     echo 'back up info file: y/n'
+#     read a
+#     if [ "$a" == "y" ]; then
+# 	echo 'yes' $a
+#     else
+# 	echo 'no' $a
+#     fi
+# }
+
+
+read_info(){
+    pushd $HOME
+
+    if [ -f info ]; then
+       echo 'file is open'
+       return
+    fi
+
+    gpg info.gpg
+    e info
+    if [ -f info~ ]; then
+	echo 'backup file y/n'
+	read result
+	if [ "$result" == 'y' ]; then
+	    rm info.gpg
+	    gpg -c info
+	    cp info.gpg info.gpg.bak
+	fi
+	rm info~	
+    fi
+    rm info
+    popd    
+}

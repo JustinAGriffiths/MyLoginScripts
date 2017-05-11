@@ -18,12 +18,10 @@ export PROMPT_COMMAND='prompt_string=`$HOME/MyLoginScripts/python/prompt.py`'
 PS1='\[\033[0;35m\]$prompt_string\n\[\033[1;36m\]\u@\h: $ \[\033[0m\]'
 export HISTCONTROL="ignoredups"
 
-
-
 #general stuff
 export MANPATH=$MANPATH:/usr/local/share/man
 alias open='gnome-open'
-alias which='alias | /usr/bin/which --tty-only --read-alias --show-dot --show-tilde'
+#alias which='alias | /usr/bin/which --tty-only --read-alias --show-dot --show-tilde'
 alias ssh='ssh -Y '
 alias ls='ls --color=tty -B'
 alias cls='clear'
@@ -32,7 +30,11 @@ alias emacs='emacs -nw'
 alias e='emacs -nw'
 alias cursor='tput cnorm'
 export PATH=$PATH:~/bin
+export PATH=$HOME/packages/R-dev-3.3.3/bin/:$PATH
 export PYTHONSTARTUP=$HOME/.helper_scripts/python_startup.py
+export PYTHONPATH=$PYTHONPATH:$HOME/workarea/MyUtils/
+
+alias aws='ssh -Y -t -l citprod\\sg0228178 10.6.33.84 "ssh -Y cit-p-tnmlas006"'
 
 #cern/atlas stuff
 export SVNGROUPS='svn+ssh://svn.cern.ch/reps/atlasgrps/'
@@ -79,6 +81,8 @@ if [ $TTY == 0 ]; then
     source $HOME/.bash_functions
 fi
 
+vbox_mount
+
 if [ $TTY == 0 ]; then
     winname $SHORT_HOSTNAME
     tabname $SHORT_HOSTNAME
@@ -94,3 +98,4 @@ if [ $TTY == 0 ]; then
 fi
 
 cd $HOME
+
