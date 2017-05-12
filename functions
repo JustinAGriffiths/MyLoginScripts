@@ -344,10 +344,6 @@ virtual_py35(){
     virtual_generic ".virtual_py35"
 }
 
-vm(){
-    virtual_py35
-}
-
 virtual_py27(){
     virtual_generic .virtual_py27
 }
