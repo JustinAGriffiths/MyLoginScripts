@@ -164,11 +164,13 @@ put_to(){
     target="~/"
     if [[ $2 ]] ; then target=$2; fi
     scp -r $1 $uname@$HOST1:~/transfers/
-    ssh $uname@$HOST1  "scp -i .ssh/id_rsa.pub-r transfers/'$file_name' citprod\\\\sg0228178@$HOST2:'$target'"
+    ssh $uname@$HOST1  "scp -r transfers/'$file_name' $HOST2:'$target'"
 }
 
 aws_put(){
-    put_to $1 $2 10.6.33.87 cit-p-tnmlas006 citprod\\sg0228178
+    target=/home/sg0228178/
+    if [[ $2 ]]; then target=$2 ; fi
+    put_to $1 $target 10.6.33.87 cit-p-tnmlas006 citprod\\sg0228178
 }
 
 atlas_get(){
@@ -340,6 +342,10 @@ virtual_generic(){
 
 virtual_py35(){
     virtual_generic ".virtual_py35"
+}
+
+vm(){
+    virtual_py35
 }
 
 virtual_py27(){
