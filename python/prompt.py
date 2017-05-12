@@ -10,7 +10,7 @@ bc_len=0
 if bc is None:
     bc=''
 else:
-    bc_len=len(bc)
+    if vm is not None: bc_len=len(bc)
     bc=('\033'+bc[bc.index('[0;'):]).replace('\\]','')
     pass
 if vm is not None:
@@ -18,6 +18,8 @@ if vm is not None:
     vm='\033[0;31m(vm='+vm+')'+bc
     vm='__'+vm+'__'
     pass
+else: vm=''
+
 import datetime
 
 print ((datetime.datetime.now().ctime()+'_'+os.popen('pwd').read().split()[0]+vm).ljust(int(columns)+bc_len,'_'))
