@@ -14,8 +14,10 @@ if [ $? == 0 ]; then
     export SHORT_HOSTNAME='Mac'
 fi
 
-export PROMPT_COMMAND='prompt_string=`$HOME/MyLoginScripts/python/prompt.py`'
-PS1='\[\033[0;35m\]$prompt_string\n\[\033[1;36m\]\u@\h: $ \[\033[0m\]'
+export BAR_COLOR='\[\033[0;32m\]'
+export PROMPT_COMMAND='export PS1=$MYPS1;prompt_string=`$HOME/MyLoginScripts/python/prompt.py`'
+MYPS1=$BAR_COLOR'$prompt_string\n\[\033[1;36m\]\u@\h: $ \[\033[0m\]'
+PS1=$MYPS1
 export HISTCONTROL="ignoredups"
 
 #general stuff
