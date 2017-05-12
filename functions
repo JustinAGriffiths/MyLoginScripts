@@ -17,7 +17,7 @@ read_notes(){
     emacs -nw ~/.notes
 }
 
-open-png(){
+open_png(){
     dir=some_dummy_dir
     if [ -d $dir ];then rm -rf $dir; fi
     mkdir -p $dir
