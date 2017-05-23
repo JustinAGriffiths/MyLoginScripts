@@ -17,3 +17,6 @@ vbox_mount
 vm(){
     virtual_generic ".virtual_py35"
 }                    
+
+AWSUSER=citprod\\sg0228178
+JUMPBOX=$AWSUSER@10.6.33.84
