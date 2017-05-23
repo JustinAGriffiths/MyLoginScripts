@@ -1,0 +1,9 @@
+#!/usr/bin/env python
+
+import os, datetime
+
+while [ True ]:
+    print('__keep_alive__')
+    os.system('sleep 60')
+    pass
+
