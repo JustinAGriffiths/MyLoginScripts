@@ -411,6 +411,7 @@ read_info(){
 	if [ "$result" == 'y' ]; then
 	    rm info.gpg
 	    gpg -c info
+	    if [ $? != 0 ]; then echo 'inconsistent passwords, intervene'; return; fi
 	    cp info.gpg info.gpg.bak
 	fi
 	rm info~	
@@ -419,3 +420,12 @@ read_info(){
     popd    
 }
 
+ssh2(){
+    sed -i 's,^#ProxyCommand,ProxyCommand,g' $HOME/.ssh/config
+    gpg $HOME/.corkscrew-auth.gpg
+    command=`which $1`
+    options=`echo $@ | sed 's,^'$1',,g'`
+    $command $options
+    rm $HOME/.corkscrew-auth
+    sed -i 's,^ProxyCommand,#ProxyCommand,g' $HOME/.ssh/config    
+}
