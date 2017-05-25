@@ -28,7 +28,7 @@ os.system('mkdir -p %s' %args.directory)
 all_files=''
 for f in args.files: all_files+=f+' '
 
-os.system('cp %s %s' %(all_files, args.directory))
+os.system('cp -r %s %s' %(all_files, args.directory))
 
 zip_command='tar -czvf %s.tgz %s' %(args.directory, args.directory)
 if args.zip: os.system(zip_command)

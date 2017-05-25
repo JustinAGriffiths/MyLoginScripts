@@ -32,6 +32,7 @@ alias emacs='emacs -nw'
 alias e='emacs -nw'
 alias cursor='tput cnorm'
 export PATH=$PATH:~/bin
+export PATH=$PATH:$HOME/MyLoginScripts/bin
 export PATH=$HOME/packages/R-dev-3.3.3/bin/:$PATH
 export PYTHONSTARTUP=$HOME/.helper_scripts/python_startup.py
 export PYTHONPATH=$PYTHONPATH:$HOME/workarea/MyUtils/
