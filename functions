@@ -8,7 +8,7 @@
 notes(){ 
     if [ -f ~/.notes ]; then 
 	printf '\033[0;31m'
-	cat ~/.notes 
+	grep -v '^#' ~/.notes 
 	printf '\033[0m'
     fi
 }

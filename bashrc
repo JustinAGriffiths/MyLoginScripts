@@ -35,7 +35,7 @@ export PATH=$PATH:~/bin
 export PATH=$PATH:$HOME/MyLoginScripts/bin
 export PATH=$HOME/packages/R-dev-3.3.3/bin/:$PATH
 export PYTHONSTARTUP=$HOME/.helper_scripts/python_startup.py
-export PYTHONPATH=$PYTHONPATH:$HOME/workarea/MyUtils/
+export PYTHONPATH=$PYTHONPATH:$HOME/MyUtils/:$HOME/python_etc/
 
 alias aws='ssh -Y -t -l citprod\\sg0228178 10.6.33.84 "ssh -Y cit-p-tnmlas006"'
 
@@ -100,3 +100,4 @@ fi
 
 cd $HOME
 
+set +o posix
