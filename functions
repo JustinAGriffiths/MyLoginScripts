@@ -5,6 +5,26 @@
 
 # }
 
+copy_to_aws(){
+    target='/tnmlas/tngo_restapi/mvd_data_files/Input/AdHocReports'    
+    
+    if [[ $2 ]]; then target=$2; fi
+
+    scp $1 tngo_restapi@10.6.33.84:
+    ssh tngo_restapi@10.6.33.84 "scp $1 sg0228178@10.6.24.189:$target"
+    
+		      
+}
+
+copy_sr360(){
+    cd $HOME/Downloads/
+    f=`ls -trd reports.sabre*.zip |tail -n1`
+    ls "$f"
+    cp "$f" reports.sabre_x.zip
+    ssh tngo_restapi@10.6.33.84 'ssh sg0228178@10.6.24.189 "rm /tnmlas/tngo_restapi/mvd_data_files/Input/SR360/reports.sabre_x.zip"' 
+    copy_to_aws reports.sabre_x.zip /tnmlas/tngo_restapi/mvd_data_files/Input/SR360/
+}
+
 notes(){ 
     if [ -f ~/.notes ]; then 
 	printf '\033[0;31m'

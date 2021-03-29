@@ -4,8 +4,19 @@ if [ $TTY == 0 ]; then
     printf 'Running Mac setups\n'
 fi
 
-export KRB5_CONFIG=$HOME/.krb5.conf 
-alias kinit='/usr/bin/kinit griffith@CERN.CH'
+alias vm='source $HOME/virtualenv/bin/activate'
+
+#oracle crap
+export ORACLE_HOME=/usr/local/oracle
+export DYLD_LIBRARY_PATH=$ORACLE_HOME/instantclient_12_2
+export LD_LIBRARY_PATH=$ORACLE_HOME/instantclient_12_2
+
+export PATH=$PATH:/usr/local/mysql/bin/
+alias aws='ssh tngo_restapi@10.6.33.84 -t "ssh sg0228178@cit-p-tnmlas006"'
+alias tunnel='ssh -D 9098 tngo_restapi@10.6.33.84 -t "top"'
+alias kinit='kinit -kt sg0228178.keytab sg0228178@HADOOP.SGDCPROD.SABRE.COM'
+
+export KRB5_CONFIG=$HOME/krb5.conf 
 
 alias open='/usr/bin/open'
 alias which='/usr/bin/which'
@@ -16,7 +27,7 @@ alias ls='ls -G'
 
 #source $HOME/root-v5-32-00-patches/bin/thisroot.sh
 #source $HOME/root_src/root/bin/thisroot.sh
-source $HOME/root/bin/thisroot.sh
+#source $HOME/root/bin/thisroot.sh
 
 export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$HOME/my_code/lib
 

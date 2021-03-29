@@ -1,8 +1,12 @@
 #!bin/bash
 #echo "Welcome to My Terminal :)"
-
+alias aws='ssh tngo_restapi@10.6.33.84 -t "ssh sg0225xxx@10.6.24.180"'
+alias tunnel='ssh tngo_restapi@10.6.33.84 -t "top"'
 buffer=`tty`
 export TTY=$?
+
+#   '#' --> '%23'
+#export all_proxy='http://sg0228178:passwd@www-ad-proxy.sabre.com:80' 
 
 export SHORT_HOSTNAME=`echo $HOSTNAME | grep -io '^[a-zA-Z0-9_]*'`
 if [ "$SHORT_HOSTNAME" == "master" ]; then
@@ -19,6 +23,9 @@ export PROMPT_COMMAND='export PS1=$MYPS1;prompt_string=`$HOME/MyLoginScripts/pyt
 MYPS1=$BAR_COLOR'$prompt_string\n\[\033[1;36m\]\u@\h: $ \[\033[0m\]'
 PS1=$MYPS1
 export HISTCONTROL="ignoredups"
+export HADOOP='hdpct2ldap02g02.hadoop.sgdcprod.sabre.com'
+export CERT_HADOOP='hdp032ldacgw101.hadoop.sgdccert.sabre.com'
+export DEV_HADOOP='hdp032ldadgw001.hadoop.sgdcelab.sabre.com'
 
 #general stuff
 export MANPATH=$MANPATH:/usr/local/share/man
@@ -34,10 +41,31 @@ alias cursor='tput cnorm'
 export PATH=$PATH:~/bin
 export PATH=$PATH:$HOME/MyLoginScripts/bin
 export PATH=$HOME/packages/R-dev-3.3.3/bin/:$PATH
+export PATH=$HOME/TNGOUtils/bin:$PATH
 export PYTHONSTARTUP=$HOME/.helper_scripts/python_startup.py
-export PYTHONPATH=$PYTHONPATH:$HOME/MyUtils/:$HOME/python_etc/
+#export PYTHONPATH=$PYTHONPATH:$HOME/MyUtils/:$HOME/python_etc/
+export PYTHONPATH=$PYTHONPATH:$HOME/TNGOUtils/:$HOME/python_etc/
 
 alias aws='ssh -Y -t -l citprod\\sg0228178 10.6.33.84 "ssh -Y cit-p-tnmlas006"'
+alias azure='ssh -Y -t -l tngo_restapi 10.6.33.84 "ssh -Y justing@dsvm-aitraining.southcentralus.cloudapp.azure.com"'
+alias hadoop_server='ssh -c aes192-cbc sg228178@bdaolp013node14.sabre.com'
+#alias hadoop_scp='ssh -c aes192-cbc sg228178@bdaolp013node14.sabre.com'
+
+
+hadoop_scp() {
+    if [[ ! $1 ]]; then
+	echo "provide file/dir"
+    fi
+    scp -c aes192-cbc -r $@ sg228178@bdaolp013node14.sabre.com:transfer/
+}
+
+hadoop_rscp() {
+    if [[ ! $1 ]]; then
+	echo "provide file/dir"
+    fi
+    scp -c aes192-cbc -r sg228178@bdaolp013node14.sabre.com:$1 .
+}
+
 
 #cern/atlas stuff
 export SVNGROUPS='svn+ssh://svn.cern.ch/reps/atlasgrps/'

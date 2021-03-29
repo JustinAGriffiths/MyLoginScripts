@@ -22,4 +22,4 @@ else: vm=''
 
 import datetime
 
-print ((datetime.datetime.now().ctime()+'_'+os.popen('pwd').read().split()[0]+vm).ljust(int(columns)+bc_len,'_'))
+print ((datetime.datetime.now().ctime()+'_'+os.popen('pwd').read().split('\n')[0]+vm).ljust(int(columns)+bc_len,'_'))
